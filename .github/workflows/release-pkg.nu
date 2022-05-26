@@ -48,7 +48,8 @@ let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
 let executable = $'target/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
 
-cd $src; mkdir $dist; rm -rf target/release/*.d
+cd $src; mkdir $dist;
+rm -rf target/release/*.d target/release/nu_pretty_hex
 $'All executable files:'; hr-line -b
 ls -f $executable
 
