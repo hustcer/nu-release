@@ -16,6 +16,8 @@ let src = $env.GITHUB_WORKSPACE
 let dist = $'($env.GITHUB_WORKSPACE)/dist'
 let version = (open Cargo.toml | get package.version)
 
+$env
+
 $'Packaging ($bin) v($version) for ($target) in ($src)...'; hr-line -b
 if not ('Cargo.lock' | path exists) { cargo generate-lockfile }
 
@@ -30,6 +32,8 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 
 # ----------------------------------------------------------------------------
 # Build for Windows
+# This perl implementation doesn't produce Windows like paths
+# REF: https://github.com/openssl/openssl/blob/master/NOTES-PERL.md#perl-on-windows
 # ----------------------------------------------------------------------------
 if $os in ['windows-latest'] {
     cargo build --release --all --features=extra,static-link-openssl
@@ -48,8 +52,8 @@ $'All executable files:'; hr-line -b
 ls -f $executable
 
 $'Copying release files...'; hr-line -b
-cp README.release.txt $dist
-echo [LICENSE README* $executable] | each {|it| cp -r $it $dist }
+cp README.release.txt $dist/README.txt
+echo [LICENSE $executable] | each {|it| cp -r $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
 
 # ----------------------------------------------------------------------------
