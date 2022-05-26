@@ -11,15 +11,13 @@
 let bin = 'nu'
 let os = $env.OS
 let target = $env.TARGET
-# Repo source dir like `/home/runner/work/musd/musd`
+# Repo source dir like `/home/runner/work/nushell/nushell`
 let src = $env.GITHUB_WORKSPACE
 let dist = $'($env.GITHUB_WORKSPACE)/dist'
 let version = (open Cargo.toml | get package.version)
 
 $'Packaging ($bin) v($version) for ($target) in ($src)...'; hr-line -b
-if not ('Cargo.lock' | path exists) {
-    cargo generate-lockfile
-}
+if not ('Cargo.lock' | path exists) { cargo generate-lockfile }
 
 $'Start building ($bin)...'; hr-line
 
@@ -50,7 +48,8 @@ $'All executable files:'; hr-line -b
 ls -f $executable
 
 $'Copying release files...'; hr-line -b
-echo [LICENSE README* Cargo.* $executable] | each {|it| cp -r $it $dist }
+cp README.release.txt $dist
+echo [LICENSE README* $executable] | each {|it| cp -r $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
 
 # ----------------------------------------------------------------------------
@@ -70,13 +69,13 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
     Invoke-WebRequest -Uri 'https://github.com/jftuga/less-Windows/releases/download/less-v562.0/less.exe' -OutFile 'target\release\less.exe'
     Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE' -OutFile 'target\release\LICENSE-for-less.txt'
 
+    # Create Windows msi release package
     if (get-env _EXTRA_) == 'msi' {
-        # Create Windows msi release package
+
+        let wixRelease = $'($src)/target/wix/($releaseStem).msi'
         $'Start creating Windows msi package...'
         cd $src; hr-line -b
-        let wixRelease = $'($src)/target/wix/($releaseStem).msi'
-        cargo install cargo-wix --version 0.3.2
-        cargo wix init
+        cargo install cargo-wix --version 0.3.2; cargo wix init
         cargo wix --no-build --nocapture --output $wixRelease
         echo $'::set-output name=archive::($wixRelease)'
 
