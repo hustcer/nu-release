@@ -36,7 +36,8 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 # REF: https://github.com/openssl/openssl/blob/master/NOTES-PERL.md#perl-on-windows
 # ----------------------------------------------------------------------------
 if $os in ['windows-latest'] {
-    cargo build --release --all --features=extra,static-link-openssl
+    # TODO: Add static-link-openssl feature?
+    cargo build --release --all --features=extra
 }
 
 # ----------------------------------------------------------------------------
