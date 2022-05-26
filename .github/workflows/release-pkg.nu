@@ -76,7 +76,7 @@ if $os in ['windows-latest', 'macos-latest'] {
 # ----------------------------------------------------------------------------
 let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
 # nu, nu_plugin_* were all included
-let executable = $'target/($target)/release/($bin)*($suffix)'
+let executable = $'target/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
 $'Copying release files...'
 cd $src; mkdir $dist
