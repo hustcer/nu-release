@@ -43,7 +43,7 @@ if $os == 'ubuntu-latest' {
         # let make = (make | complete); print ($make | get stderr)
         # # This is very important here, Otherwise will cause `error adding symbols: file in wrong format`
         # let-env CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = 'aarch64-linux-gnu-gcc'
-        # cd $src; cargo build --release --all --features=extra,static-link-openssl
+        cd $src; cargo build --release --all --features=extra,static-link-openssl
 
     } else if $target == 'armv7-unknown-linux-gnueabihf' {
         # sudo apt-get install pkg-config gcc-arm-linux-gnueabihf -y
@@ -52,7 +52,7 @@ if $os == 'ubuntu-latest' {
         # sed '/-m64/d' Makefile | save Makefile.bk; mv Makefile.bk Makefile
         # let make = (make | complete); print ($make | get stderr)
         # let-env CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
-        # cd $src; cargo build --release --all --features=extra,static-link-openssl
+        cd $src; cargo build --release --all --features=extra,static-link-openssl
 
     } else {
 
@@ -75,7 +75,8 @@ if $os in ['windows-latest', 'macos-latest'] {
 # Prepare for the release archive
 # ----------------------------------------------------------------------------
 let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
-let executable = $'target/($target)/release/($bin)($suffix)'
+# nu, nu_plugin_* were all included
+let executable = $'target/($target)/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
 $'Copying release files...'
 cd $src; mkdir $dist
