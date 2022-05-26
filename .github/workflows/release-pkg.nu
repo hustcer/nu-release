@@ -24,51 +24,17 @@ if not ('Cargo.lock' | path exists) {
 $'Start building ($bin)...'; hr-line
 
 # ----------------------------------------------------------------------------
-# Fix OpenSSL related issues on Ubuntu and then build the release binary
+# Build for Windows and macOS
 # ----------------------------------------------------------------------------
-if $os == 'ubuntu-latest' {
-
-    # cd /usr/share
-    # wget https://www.openssl.org/source/openssl-1.1.1o.tar.gz
-    # tar xzf openssl-1.1.1o.tar.gz; cd openssl-1.1.1o
-
-    # let-env OPENSSL_LIB_DIR = '/usr/share/openssl-1.1.1o/'
-    # let-env OPENSSL_INCLUDE_DIR = '/usr/share/openssl-1.1.1o/include'
-    if $target == 'aarch64-unknown-linux-gnu' {
-        # sudo apt-get install gcc-aarch64-linux-gnu -y
-        # let configure = (./config shared no-asm no-async --cross-compile-prefix=aarch64-linux-gnu- | complete)
-        # print ($configure | get stderr)
-        # # Remove `-m64` string in Makefile
-        # sed '/-m64/d' Makefile | save Makefile.bk; mv Makefile.bk Makefile
-        # let make = (make | complete); print ($make | get stderr)
-        # # This is very important here, Otherwise will cause `error adding symbols: file in wrong format`
-        # let-env CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = 'aarch64-linux-gnu-gcc'
-        cd $src; cargo build --release --all --features=extra,static-link-openssl
-
-    } else if $target == 'armv7-unknown-linux-gnueabihf' {
-        # sudo apt-get install pkg-config gcc-arm-linux-gnueabihf -y
-        # let configure = (./config shared no-asm no-async --cross-compile-prefix=arm-linux-gnueabihf- | complete)
-        # print ($configure | get stderr)
-        # sed '/-m64/d' Makefile | save Makefile.bk; mv Makefile.bk Makefile
-        # let make = (make | complete); print ($make | get stderr)
-        # let-env CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
-        cd $src; cargo build --release --all --features=extra,static-link-openssl
-
-    } else {
-
-        # # musl-tools to fix 'Failed to find tool. Is `musl-gcc` installed?'
-        # sudo apt install musl-tools -y
-        # let configure = (./config shared | complete); print ($configure | get stderr)
-        # let make = (make | complete); print ($make | get stderr)
-        cd $src; cargo build --release --all --features=extra,static-link-openssl
-    }
+if $os in ['ubuntu-latest', 'macos-latest'] {
+    cargo build --release --all --features=extra,static-link-openssl
 }
 
 # ----------------------------------------------------------------------------
-# Build for Windows and macOS
+# Build for Windows
 # ----------------------------------------------------------------------------
-if $os in ['windows-latest', 'macos-latest'] {
-    cd $src; cargo build --release --all --features=extra,static-link-openssl
+if $os in ['windows-latest'] {
+    cargo build --release --all --features=extra,static-link-openssl
 }
 
 # ----------------------------------------------------------------------------
@@ -77,12 +43,12 @@ if $os in ['windows-latest', 'macos-latest'] {
 let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
 # nu, nu_plugin_* were all included
 let executable = $'target/release/($bin)*($suffix)'
-$'Current executable file: ($executable)'
+$'Current executable file(s): ($executable)'
 
-cd $src; mkdir $dist
-rm -rf target/release/*.d
+cd $src; mkdir $dist; rm -rf target/release/*.d
 $'All executable files:'; hr-line -b
 ls -f $executable
+
 $'Copying release files...'; hr-line -b
 echo [LICENSE README* Cargo.* $executable] | each {|it| cp -r $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
