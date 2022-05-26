@@ -27,6 +27,9 @@ $'Start building ($bin)...'; hr-line
 # Build for Windows and macOS
 # ----------------------------------------------------------------------------
 if $os in ['ubuntu-latest', 'macos-latest'] {
+    if $os == 'ubuntu-latest' {
+        sudo apt-get install libxcb-composite0-dev
+    }
     cargo build --release --all --features=extra,static-link-openssl
 }
 
