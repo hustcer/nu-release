@@ -67,6 +67,7 @@ jobs:
       uses: actions-rs/toolchain@v1.0.6
       with:
         override: true
+        profile: minimal
         toolchain: stable
         target: ${{ matrix.target }}
 

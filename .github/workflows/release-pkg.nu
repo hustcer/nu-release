@@ -81,10 +81,6 @@ $'Current executable file: ($executable)'
 
 cd $src; mkdir $dist
 rm -rf target/release/*.d
-$'Files in current directory - ($env.PWD)'; hr-line; ls
-$'-------------- List files contain nu that changed in 2 hours begin -----------------'
-ls **/*/nu* | where type == file && modified > ((date now) - 2hr)
-$'--------------- List files changed in 2 hours end ------------------'
 $'All executable files:'; hr-line -b
 ls -f $executable
 $'Copying release files...'; hr-line -b
