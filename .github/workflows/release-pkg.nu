@@ -75,13 +75,16 @@ if $os in ['windows-latest', 'macos-latest'] {
 # Prepare for the release archive
 # ----------------------------------------------------------------------------
 let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
-ls -f
-tree target -L 2
 # nu, nu_plugin_* were all included
 let executable = $'target/($target)/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
 $'Copying release files...'
 cd $src; mkdir $dist
+ls -f
+$'List files ------------------------------- begin'
+ls **/*/nu* | where type == file && modified > ((date now) - 2hr)
+$'List files ------------------------------- end'
+ls -f $executable
 echo [LICENSE README* Cargo.* $executable] | each {|it| cp -r $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
 
