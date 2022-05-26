@@ -80,10 +80,12 @@ let executable = $'target/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
 $'Copying release files...'
 cd $src; mkdir $dist
+rm -rf target/release/*.d
+
 ls -f
-$'List files ------------------------------- begin'
+$'-------------- List files changed in 2 hours begin -----------------'
 ls **/*/nu* | where type == file && modified > ((date now) - 2hr)
-$'List files ------------------------------- end'
+$'--------------- List files changed in 2 hours end ------------------'
 ls -f $executable
 echo [LICENSE README* Cargo.* $executable] | each {|it| cp -r $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
