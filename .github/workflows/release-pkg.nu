@@ -52,7 +52,7 @@ $'All executable files:'; hr-line -b
 ls -f $executable
 
 $'Copying release files...'; hr-line -b
-cp README.release.txt $dist/README.txt
+cp README.release.txt $'($dist)/README.txt'
 echo [LICENSE $executable] | each {|it| cp -r $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
 
