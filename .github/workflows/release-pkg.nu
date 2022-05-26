@@ -108,7 +108,6 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
         # Create Windows msi release package
         $'Start creating Windows msi package...'
         cd $src; hr-line -b
-        mkdir target/release; cp $executable target/release/
         let wixRelease = $'($src)/target/wix/($releaseStem).msi'
         cargo install cargo-wix --version 0.3.2
         cargo wix init
