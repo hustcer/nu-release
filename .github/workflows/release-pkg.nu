@@ -75,6 +75,8 @@ if $os in ['windows-latest', 'macos-latest'] {
 # Prepare for the release archive
 # ----------------------------------------------------------------------------
 let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
+ls -f
+tree target -L 2
 # nu, nu_plugin_* were all included
 let executable = $'target/($target)/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
