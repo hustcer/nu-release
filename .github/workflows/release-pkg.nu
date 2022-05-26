@@ -43,7 +43,7 @@ if $os in ['windows-latest'] {
 let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
 # nu, nu_plugin_* were all included
 let executable = $'target/release/($bin)*($suffix)'
-$'Current executable file(s): ($executable)'
+$'Current executable file: ($executable)'
 
 cd $src; mkdir $dist; rm -rf target/release/*.d
 $'All executable files:'; hr-line -b
