@@ -78,15 +78,16 @@ let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
 # nu, nu_plugin_* were all included
 let executable = $'target/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
-$'Copying release files...'
+
 cd $src; mkdir $dist
 rm -rf target/release/*.d
-
-ls -f
-$'-------------- List files changed in 2 hours begin -----------------'
+$'Files in current directory - ($env.PWD)'; hr-line; ls
+$'-------------- List files contain nu that changed in 2 hours begin -----------------'
 ls **/*/nu* | where type == file && modified > ((date now) - 2hr)
 $'--------------- List files changed in 2 hours end ------------------'
+$'All executable files:'; hr-line -b
 ls -f $executable
+$'Copying release files...'; hr-line -b
 echo [LICENSE README* Cargo.* $executable] | each {|it| cp -r $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
 
@@ -103,6 +104,9 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 } else if $os == 'windows-latest' {
 
     let releaseStem = $'($bin)-($version)-($target)'
+
+    Invoke-WebRequest -Uri 'https://github.com/jftuga/less-Windows/releases/download/less-v562.0/less.exe' -OutFile 'target\release\less.exe'
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE' -OutFile 'target\release\LICENSE-for-less.txt'
 
     if (get-env _EXTRA_) == 'msi' {
         # Create Windows msi release package
