@@ -70,17 +70,21 @@ rm -rf target/release/*.d target/release/nu_pretty_hex*
 $'(char nl)All executable files:'; hr-line
 ls -f $executable
 
-$'(char nl)Check binary release version detail:'; hr-line
-./target/release/nu -c 'version'
-
 $'(char nl)Copying release files...'; hr-line -b
 cp -v README.release.txt $'($dist)/README.txt'
 echo [LICENSE $executable] | each {|it| cp -rv $it $dist }
-cd $dist; $'Creating release archive...'; hr-line
+
+$'(char nl)Check binary release version detail:'; hr-line
+if $os == 'windows-latest' {
+    do -i { ./output/nu.exe -c 'version' }
+} else {
+    do -i { ./output/nu -c 'version' }
+}
 
 # ----------------------------------------------------------------------------
 # Create a release archive and send it to output for the following steps
 # ----------------------------------------------------------------------------
+cd $dist; $'Creating release archive...'; hr-line
 if $os in ['ubuntu-latest', 'macos-latest'] {
 
     let archive = $'($dist)/($bin)-($version)-($target).tar.gz'
