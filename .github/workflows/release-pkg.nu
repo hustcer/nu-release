@@ -30,14 +30,22 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
     if $os == 'ubuntu-latest' {
         sudo apt-get install libxcb-composite0-dev
     }
-    cargo build --release --all --features=extra,static-link-openssl $flags
+    if ($flags | str trim | empty?) {
+        cargo build --release --all --features=extra,static-link-openssl
+    } else {
+        cargo build --release --all --features=extra,static-link-openssl $flags
+    }
 }
 
 # ----------------------------------------------------------------------------
 # Build for Windows without static-link-openssl feature
 # ----------------------------------------------------------------------------
 if $os in ['windows-latest'] {
-    cargo build --release --all --features=extra $flags
+    if ($flags | str trim | empty?) {
+        cargo build --release --all --features=extra
+    } else {
+        cargo build --release --all --features=extra $flags
+    }
 }
 
 # ----------------------------------------------------------------------------
