@@ -108,7 +108,7 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
         $'(char nl)Start creating Windows msi package...'
         cd $src; hr-line
         # Wix need the binaries be stored in target/release/
-        cp -r $dist/* target/release/
+        cp -r $'($dist)/*' target/release/
         cargo install cargo-wix --version 0.3.2
         cargo wix --no-build --nocapture --package nu --output $wixRelease
         echo $'::set-output name=archive::($wixRelease)'
