@@ -66,7 +66,7 @@ let executable = $'target/($target)/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
 
 cd $src; mkdir $dist;
-rm -rf target/($target)/release/*.d target/($target)/release/nu_pretty_hex*
+rm -rf $'target/($target)/release/*.d' $'target/($target)/release/nu_pretty_hex*'
 $'(char nl)All executable files:'; hr-line
 ls -f $executable
 
