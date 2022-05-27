@@ -1,6 +1,5 @@
 #!/usr/bin/env nu
 
-# Author: hustcer
 # Created: 2022/05/26 19:05:20
 # Description:
 #   A script to do the github release task, need nushell to be installed.
@@ -34,12 +33,9 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 }
 
 # ----------------------------------------------------------------------------
-# Build for Windows
-# This perl implementation doesn't produce Windows like paths
-# REF: https://github.com/openssl/openssl/blob/master/NOTES-PERL.md#perl-on-windows
+# Build for Windows without static-link-openssl feature
 # ----------------------------------------------------------------------------
 if $os in ['windows-latest'] {
-    # TODO: Add static-link-openssl feature?
     cargo build --release --all --features=extra
 }
 
@@ -52,7 +48,7 @@ let executable = $'target/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
 
 cd $src; mkdir $dist;
-rm -rf target/release/*.d target/release/nu_pretty_hex
+rm -rf target/release/*.d target/release/nu_pretty_hex*
 $'All executable files:'; hr-line -b
 ls -f $executable
 
@@ -75,8 +71,8 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 
     let releaseStem = $'($bin)-($version)-($target)'
 
-    Invoke-WebRequest -Uri 'https://github.com/jftuga/less-Windows/releases/download/less-v562.0/less.exe' -OutFile 'target\release\less.exe'
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE' -OutFile 'target\release\LICENSE-for-less.txt'
+    Invoke-WebRequest -Uri 'https://github.com/jftuga/less-Windows/releases/download/less-v562.0/less.exe' -OutFile $'($dist)\less.exe'
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE' -OutFile $'($dist)\LICENSE-for-less.txt'
 
     # Create Windows msi release package
     if (get-env _EXTRA_) == 'msi' {
