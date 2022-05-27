@@ -75,12 +75,11 @@ cp -v README.release.txt $'($dist)/README.txt'
 [LICENSE $executable] | each {|it| cp -rv $it $dist } | flatten
 
 $'(char nl)Check binary release version detail:'; hr-line
-let ver = if $os == 'windows-latest' {
-    (do -i { ./output/nu.exe -c 'version' } | complete)
+if $os == 'windows-latest' {
+    do -i { ./output/nu.exe -c 'version' }
 } else {
-    (do -i { ./output/nu -c 'version' } | complete)
+    do -i { ./output/nu -c 'version' }
 }
-print $ver.stdout; print $ver.stderr
 
 # ----------------------------------------------------------------------------
 # Create a release archive and send it to output for the following steps
