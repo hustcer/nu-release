@@ -16,9 +16,9 @@ let flags = $env.TARGET_RUSTFLAGS
 let dist = $'($env.GITHUB_WORKSPACE)/output'
 let version = (open Cargo.toml | get package.version)
 
-$env
+# $env
 
-$'Packaging ($bin) v($version) for ($target) in ($src)...'; hr-line -b
+$'(char nl)Packaging ($bin) v($version) for ($target) in ($src)...'; hr-line -b
 if not ('Cargo.lock' | path exists) { cargo generate-lockfile }
 
 $'Start building ($bin)...'; hr-line -b
@@ -58,10 +58,10 @@ $'Current executable file: ($executable)'
 
 cd $src; mkdir $dist;
 rm -rf target/release/*.d target/release/nu_pretty_hex*
-$'All executable files:'; hr-line -b
+$'(char nl)All executable files:'; hr-line
 ls -f $executable
 
-$'Copying release files...'; hr-line -b
+$'(char nl)Copying release files...'; hr-line -b
 cp README.release.txt $'($dist)/README.txt'
 echo [LICENSE $executable] | each {|it| cp -r $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
@@ -80,7 +80,7 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 
     let releaseStem = $'($bin)-($version)-($target)'
 
-    $'Download less related stuffs...'; hr-line -b
+    $'(char nl)Download less related stuffs...'; hr-line
     curl https://github.com/jftuga/less-Windows/releases/download/less-v590/less.exe -o $'($dist)\less.exe'
     curl https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE -o $'($dist)\LICENSE-for-less.txt'
 
@@ -88,8 +88,8 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
     if (get-env _EXTRA_) == 'msi' {
 
         let wixRelease = $'($src)/target/wix/($releaseStem).msi'
-        $'Start creating Windows msi package...'
-        cd $src; hr-line -b
+        $'(char nl)Start creating Windows msi package...'
+        cd $src; hr-line
         cargo install cargo-wix --version 0.3.2
         cargo wix --no-build --nocapture --package nu --output $wixRelease
         echo $'::set-output name=archive::($wixRelease)'
@@ -110,8 +110,8 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 def 'hr-line' [
     --blank-line(-b): bool
 ] {
-    if $blank-line { char nl }
     print $'(ansi g)---------------------------------------------------------------------------->(ansi reset)'
+    if $blank-line { char nl }
 }
 
 # Get the specified env key's value or ''
