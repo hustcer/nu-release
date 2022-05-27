@@ -80,8 +80,8 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 
     let releaseStem = $'($bin)-($version)-($target)'
 
-    wget https://github.com/jftuga/less-Windows/releases/download/less-v590/less.exe -o $'($dist)\less.exe'
-    wget https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE -o $'($dist)\LICENSE-for-less.txt'
+    pwsh -c "Invoke-WebRequest -Uri 'https://github.com/jftuga/less-Windows/releases/download/less-v590/less.exe' -OutFile $'($dist)\less.exe'"
+    pwsh -c "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE' -OutFile $'($dist)\LICENSE-for-less.txt'"
 
     # Create Windows msi release package
     if (get-env _EXTRA_) == 'msi' {
