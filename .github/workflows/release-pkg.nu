@@ -12,6 +12,7 @@ let os = $env.OS
 let target = $env.TARGET
 # Repo source dir like `/home/runner/work/nushell/nushell`
 let src = $env.GITHUB_WORKSPACE
+let flags = $env.TARGET_RUSTFLAGS
 let dist = $'($env.GITHUB_WORKSPACE)/output'
 let version = (open Cargo.toml | get package.version)
 
@@ -29,20 +30,20 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
     if $os == 'ubuntu-latest' {
         sudo apt-get install libxcb-composite0-dev
     }
-    cargo build --release --all --features=extra,static-link-openssl
+    cargo build --release --all --features=extra,static-link-openssl $flags
 }
 
 # ----------------------------------------------------------------------------
 # Build for Windows without static-link-openssl feature
 # ----------------------------------------------------------------------------
 if $os in ['windows-latest'] {
-    cargo build --release --all --features=extra
+    cargo build --release --all --features=extra $flags
 }
 
 # ----------------------------------------------------------------------------
 # Prepare for the release archive
 # ----------------------------------------------------------------------------
-let suffix = if $os == 'windows-latest' { '.exe' } else { '' }
+let suffix = if $os == 'windows-latest' { '.exe' }
 # nu, nu_plugin_* were all included
 let executable = $'target/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
@@ -71,8 +72,8 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 
     let releaseStem = $'($bin)-($version)-($target)'
 
-    Invoke-WebRequest -Uri 'https://github.com/jftuga/less-Windows/releases/download/less-v562.0/less.exe' -OutFile $'($dist)\less.exe'
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE' -OutFile $'($dist)\LICENSE-for-less.txt'
+    wget https://github.com/jftuga/less-Windows/releases/download/less-v590/less.exe -o $'($dist)\less.exe'
+    wget https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE -o $'($dist)\LICENSE-for-less.txt'
 
     # Create Windows msi release package
     if (get-env _EXTRA_) == 'msi' {
@@ -81,7 +82,7 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
         $'Start creating Windows msi package...'
         cd $src; hr-line -b
         cargo install cargo-wix --version 0.3.2
-        cargo wix --no-build --nocapture --output $wixRelease
+        cargo wix --no-build --nocapture --package nu --output $wixRelease
         echo $'::set-output name=archive::($wixRelease)'
 
     } else {
