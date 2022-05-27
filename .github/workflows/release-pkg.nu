@@ -90,6 +90,8 @@ if ($ver | str trim | empty?) {
 cd $dist; $'(char nl)Creating release archive...'; hr-line
 if $os in ['ubuntu-latest', 'macos-latest'] {
 
+    $'(char nl)(ansi g)Archive contents:(ansi reset)'; hr-line; ls
+
     let archive = $'($dist)/($bin)-($version)-($target).tar.gz'
     tar czf $archive *
     print $'archive: ---> ($archive)'; ls $archive
@@ -117,6 +119,7 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 
     } else {
 
+        $'(char nl)(ansi g)Archive contents:(ansi reset)'; hr-line; ls
         let archive = $'($dist)/($releaseStem).zip'
         7z a $archive *
         print $'archive: ---> ($archive)';
