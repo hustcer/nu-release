@@ -39,6 +39,9 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
         let-env CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
         cargo-build-nu $flags
     } else {
+        # musl-tools to fix 'Failed to find tool. Is `musl-gcc` installed?'
+        # Actually just for x86_64-unknown-linux-musl target
+        sudo apt install musl-tools -y
         cargo-build-nu $flags
     }
 }
