@@ -21,7 +21,7 @@ let version = (open Cargo.toml | get package.version)
 $'(char nl)Packaging ($bin) v($version) for ($target) in ($src)...'; hr-line -b
 if not ('Cargo.lock' | path exists) { cargo generate-lockfile }
 
-$'Start building ($bin)...'; hr-line -b
+$'Start building ($bin)...'; hr-line
 
 # ----------------------------------------------------------------------------
 # Build for Ubuntu and macOS
