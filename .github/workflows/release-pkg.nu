@@ -75,16 +75,17 @@ cp -v README.release.txt $'($dist)/README.txt'
 echo [LICENSE $executable] | each {|it| cp -rv $it $dist }
 
 $'(char nl)Check binary release version detail:'; hr-line
-if $os == 'windows-latest' {
-    do -i { ./output/nu.exe -c 'version' }
+let ver = if $os == 'windows-latest' {
+    (do -i { ./output/nu.exe -c 'version' } | complete)
 } else {
-    do -i { ./output/nu -c 'version' }
+    (do -i { ./output/nu -c 'version' } | complete)
 }
+print $ver.stdout; print $ver.stderr
 
 # ----------------------------------------------------------------------------
 # Create a release archive and send it to output for the following steps
 # ----------------------------------------------------------------------------
-cd $dist; $'Creating release archive...'; hr-line
+cd $dist; $'(char nl)Creating release archive...'; hr-line
 if $os in ['ubuntu-latest', 'macos-latest'] {
 
     let archive = $'($dist)/($bin)-($version)-($target).tar.gz'
@@ -106,6 +107,8 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
         let wixRelease = $'($src)/target/wix/($releaseStem).msi'
         $'(char nl)Start creating Windows msi package...'
         cd $src; hr-line
+        # Wix need the binaries be stored in target/release/
+        cp -r $dist/* target/release/
         cargo install cargo-wix --version 0.3.2
         cargo wix --no-build --nocapture --package nu --output $wixRelease
         echo $'::set-output name=archive::($wixRelease)'
