@@ -70,7 +70,7 @@ rm -rf $'target/($target)/release/*.d' $'target/($target)/release/nu_pretty_hex*
 $'(char nl)All executable files:'; hr-line
 ls -f $executable
 
-$'(char nl)Copying release files...'; hr-line -b
+$'(char nl)Copying release files...'; hr-line
 cp -v README.release.txt $'($dist)/README.txt'
 [LICENSE $executable] | each {|it| cp -rv $it $dist } | flatten
 
