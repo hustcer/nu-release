@@ -6,13 +6,13 @@
 # REF:
 #   1. https://github.com/volks73/cargo-wix
 
-# The binary file to be released
+# The main binary file to be released
 let bin = 'nu'
 let os = $env.OS
 let target = $env.TARGET
 # Repo source dir like `/home/runner/work/nushell/nushell`
 let src = $env.GITHUB_WORKSPACE
-let dist = $'($env.GITHUB_WORKSPACE)/dist'
+let dist = $'($env.GITHUB_WORKSPACE)/output'
 let version = (open Cargo.toml | get package.version)
 
 $env
@@ -23,7 +23,7 @@ if not ('Cargo.lock' | path exists) { cargo generate-lockfile }
 $'Start building ($bin)...'; hr-line
 
 # ----------------------------------------------------------------------------
-# Build for Windows and macOS
+# Build for Ubuntu and macOS
 # ----------------------------------------------------------------------------
 if $os in ['ubuntu-latest', 'macos-latest'] {
     if $os == 'ubuntu-latest' {
@@ -80,7 +80,7 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
         let wixRelease = $'($src)/target/wix/($releaseStem).msi'
         $'Start creating Windows msi package...'
         cd $src; hr-line -b
-        cargo install cargo-wix --version 0.3.2; cargo wix init
+        cargo install cargo-wix --version 0.3.2
         cargo wix --no-build --nocapture --output $wixRelease
         echo $'::set-output name=archive::($wixRelease)'
 
