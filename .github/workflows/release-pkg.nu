@@ -21,7 +21,7 @@ $env
 $'Packaging ($bin) v($version) for ($target) in ($src)...'; hr-line -b
 if not ('Cargo.lock' | path exists) { cargo generate-lockfile }
 
-$'Start building ($bin)...'; hr-line
+$'Start building ($bin)...'; hr-line -b
 
 # ----------------------------------------------------------------------------
 # Build for Ubuntu and macOS
@@ -80,6 +80,7 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 
     let releaseStem = $'($bin)-($version)-($target)'
 
+    $'Download less related stuffs...'; hr-line -b
     curl https://github.com/jftuga/less-Windows/releases/download/less-v590/less.exe -o $'($dist)\less.exe'
     curl https://raw.githubusercontent.com/jftuga/less-Windows/master/LICENSE -o $'($dist)\LICENSE-for-less.txt'
 
@@ -107,16 +108,16 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 
 # Print a horizontal line marker
 def 'hr-line' [
-  --blank-line(-b): bool
+    --blank-line(-b): bool
 ] {
-  print $'(ansi g)---------------------------------------------------------------------------->(ansi reset)'
-  if $blank-line { char nl }
+    if $blank-line { char nl }
+    print $'(ansi g)---------------------------------------------------------------------------->(ansi reset)'
 }
 
 # Get the specified env key's value or ''
 def 'get-env' [
-  key: string           # The key to get it's env value
-  default: string = ''  # The default value for an empty env
+    key: string           # The key to get it's env value
+    default: string = ''  # The default value for an empty env
 ] {
-  $env | get -i $key | default $default
+    $env | get -i $key | default $default
 }
