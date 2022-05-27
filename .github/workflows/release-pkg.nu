@@ -72,7 +72,7 @@ ls -f $executable
 
 $'(char nl)Copying release files...'; hr-line -b
 cp -v README.release.txt $'($dist)/README.txt'
-echo [LICENSE $executable] | each {|it| cp -rv $it $dist }
+[LICENSE $executable] | each {|it| cp -rv $it $dist } | flatten
 
 $'(char nl)Check binary release version detail:'; hr-line
 let ver = if $os == 'windows-latest' {
