@@ -61,6 +61,9 @@ rm -rf target/release/*.d target/release/nu_pretty_hex*
 $'(char nl)All executable files:'; hr-line
 ls -f $executable
 
+$'(char nl)Check binary release version detail:'; hr-line
+./target/release/nu -c 'version'
+
 $'(char nl)Copying release files...'; hr-line -b
 cp README.release.txt $'($dist)/README.txt'
 echo [LICENSE $executable] | each {|it| cp -r $it $dist }
