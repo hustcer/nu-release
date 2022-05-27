@@ -28,12 +28,18 @@ $'Start building ($bin)...'; hr-line
 # ----------------------------------------------------------------------------
 if $os in ['ubuntu-latest', 'macos-latest'] {
     if $os == 'ubuntu-latest' {
-        sudo apt-get install libxcb-composite0-dev
+        sudo apt-get install libxcb-composite0-dev -y
     }
-    if ($flags | str trim | empty?) {
-        cargo build --release --all --target $target --features=extra,static-link-openssl
+    if $target == 'aarch64-unknown-linux-gnu' {
+        sudo apt-get install gcc-aarch64-linux-gnu -y
+        let-env CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = 'aarch64-linux-gnu-gcc'
+        cargo-build-nu $flags
+    } else if $target == 'armv7-unknown-linux-gnueabihf' {
+        sudo apt-get install pkg-config gcc-arm-linux-gnueabihf -y
+        let-env CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER = 'arm-linux-gnueabihf-gcc'
+        cargo-build-nu $flags
     } else {
-        cargo build --release --all --target $target --features=extra,static-link-openssl $flags
+        cargo-build-nu $flags
     }
 }
 
@@ -53,7 +59,7 @@ if $os in ['windows-latest'] {
 # ----------------------------------------------------------------------------
 let suffix = if $os == 'windows-latest' { '.exe' }
 # nu, nu_plugin_* were all included
-let executable = $'target/release/($bin)*($suffix)'
+let executable = $'target/($target)/release/($bin)*($suffix)'
 $'Current executable file: ($executable)'
 
 cd $src; mkdir $dist;
@@ -65,8 +71,8 @@ $'(char nl)Check binary release version detail:'; hr-line
 ./target/release/nu -c 'version'
 
 $'(char nl)Copying release files...'; hr-line -b
-cp README.release.txt $'($dist)/README.txt'
-echo [LICENSE $executable] | each {|it| cp -r $it $dist }
+cp -v README.release.txt $'($dist)/README.txt'
+echo [LICENSE $executable] | each {|it| cp -rv $it $dist }
 cd $dist; $'Creating release archive...'; hr-line
 
 # ----------------------------------------------------------------------------
@@ -106,6 +112,14 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
         if not ($pkg | empty?) {
             echo $'::set-output name=archive::($pkg | get 0)'
         }
+    }
+}
+
+def 'cargo-build-nu' [ options: string ] {
+    if ($options | str trim | empty?) {
+        cargo build --release --all --target $target --features=extra,static-link-openssl
+    } else {
+        cargo build --release --all --target $target --features=extra,static-link-openssl $options
     }
 }
 
