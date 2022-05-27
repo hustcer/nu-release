@@ -31,9 +31,9 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
         sudo apt-get install libxcb-composite0-dev
     }
     if ($flags | str trim | empty?) {
-        cargo build --release --all --features=extra,static-link-openssl
+        cargo build --release --all --target $target --features=extra,static-link-openssl
     } else {
-        cargo build --release --all --features=extra,static-link-openssl $flags
+        cargo build --release --all --target $target --features=extra,static-link-openssl $flags
     }
 }
 
@@ -42,9 +42,9 @@ if $os in ['ubuntu-latest', 'macos-latest'] {
 # ----------------------------------------------------------------------------
 if $os in ['windows-latest'] {
     if ($flags | str trim | empty?) {
-        cargo build --release --all --features=extra
+        cargo build --release --all --target $target --features=extra
     } else {
-        cargo build --release --all --features=extra $flags
+        cargo build --release --all --target $target --features=extra $flags
     }
 }
 
