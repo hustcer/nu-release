@@ -209,6 +209,7 @@ pub fn create_default_context() -> EngineState {
 
         // Bits
         bind_command! {
+            Bits,
             BitsNot
         }
 
