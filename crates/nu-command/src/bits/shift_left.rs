@@ -20,11 +20,11 @@ impl Command for SubCommand {
     }
 
     fn usage(&self) -> &str {
-        "Bitwise sift left for integers"
+        "Bitwise shift left for integers"
     }
 
     fn search_terms(&self) -> Vec<&str> {
-        vec!["double"]
+        vec!["shl"]
     }
 
     fn run(
