@@ -73,7 +73,7 @@ fn operate(value: Value, bits: usize, head: Span) -> Value {
                 Some(val) => Value::Int { val, span },
                 None => Value::Error {
                     error: ShellError::GenericError(
-                        format!("Shift right overflow"),
+                        format!("Shift right overflow {} >> {}", val, shift_bits),
                         "".to_string(),
                         Some(span),
                         None,
