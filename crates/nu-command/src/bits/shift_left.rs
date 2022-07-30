@@ -67,10 +67,21 @@ impl Command for SubCommand {
 
 fn operate(value: Value, bits: usize, head: Span) -> Value {
     match value {
-        Value::Int { val, span } => Value::Int {
-            val: val << (((bits % 64) + 64) % 64),
-            span,
-        },
+        Value::Int { val, span } => {
+            let shift_bits = (((bits % 64) + 64) % 64) as u32;
+            match val.checked_shl(shift_bits) {
+                Some(val) => Value::Int { val, span },
+                None => Value::Error {
+                    error: ShellError::GenericError(
+                        format!("Shift left overflow"),
+                        "".to_string(),
+                        Some(span),
+                        None,
+                        Vec::new(),
+                    ),
+                },
+            }
+        }
         other => Value::Error {
             error: ShellError::UnsupportedInput(
                 format!(
