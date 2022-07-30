@@ -83,7 +83,7 @@ impl Command for SubCommand {
     fn examples(&self) -> Vec<Example> {
         vec![
             Example {
-                description: "Apply the logical negation to a list of numbers",
+                description: "Apply logical negation to a list of numbers",
                 example: "[4 3 2] | bits not",
                 result: Some(Value::List {
                     vals: vec![
@@ -96,7 +96,7 @@ impl Command for SubCommand {
             },
             Example {
                 description:
-                    "Apply the logical negation to a list of numbers, treat input as 2 bytes number",
+                    "Apply logical negation to a list of numbers, treat input as 2 bytes number",
                 example: "[4 3 2] | bits not -n 2",
                 result: Some(Value::List {
                     vals: vec![
@@ -109,7 +109,7 @@ impl Command for SubCommand {
             },
             Example {
                 description:
-                    "Apply the logical negation to a list of numbers, treat input as signed number",
+                    "Apply logical negation to a list of numbers, treat input as signed number",
                 example: "[4 3 2] | bits not -s",
                 result: Some(Value::List {
                     vals: vec![
