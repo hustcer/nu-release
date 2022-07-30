@@ -14,7 +14,7 @@ impl Command for SubCommand {
     }
 
     fn signature(&self) -> Signature {
-        Signature::build("and")
+        Signature::build("bits and")
             .required(
                 "target",
                 SyntaxShape::Int,
@@ -24,7 +24,7 @@ impl Command for SubCommand {
     }
 
     fn usage(&self) -> &str {
-        "performs bitwise and for integers"
+        "Performs bitwise and for integers"
     }
 
     fn search_terms(&self) -> Vec<&str> {
