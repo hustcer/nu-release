@@ -49,7 +49,7 @@ impl Command for SubCommand {
                 description: "Shift left a number with 2 bits",
                 example: "2 | bits shift-left 8",
                 result: Some(Value::Int {
-                    val: 2,
+                    val: 512,
                     span: Span::test_data(),
                 }),
             },
