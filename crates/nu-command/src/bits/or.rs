@@ -14,7 +14,7 @@ impl Command for SubCommand {
     }
 
     fn signature(&self) -> Signature {
-        Signature::build("or")
+        Signature::build("bits or")
             .required(
                 "target",
                 SyntaxShape::Int,
