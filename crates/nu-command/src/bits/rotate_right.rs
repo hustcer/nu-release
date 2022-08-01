@@ -5,7 +5,7 @@ use nu_protocol::engine::{Command, EngineState, Stack};
 use nu_protocol::{
     Category, Example, PipelineData, ShellError, Signature, Span, Spanned, SyntaxShape, Value,
 };
-use num_traits::CheckedShl;
+use num_traits::int::PrimInt;
 use std::fmt::Display;
 
 #[derive(Clone)]
@@ -13,12 +13,12 @@ pub struct SubCommand;
 
 impl Command for SubCommand {
     fn name(&self) -> &str {
-        "bits shift-left"
+        "bits rotate-right"
     }
 
     fn signature(&self) -> Signature {
-        Signature::build("bits shift-left")
-            .required("bits", SyntaxShape::Int, "number of bits to shift left")
+        Signature::build("bits rotate-right")
+            .required("bits", SyntaxShape::Int, "number of bits to rotate right")
             .switch(
                 "signed",
                 "always treat input number as a signed number",
@@ -27,18 +27,18 @@ impl Command for SubCommand {
             .named(
                 "number-bytes",
                 SyntaxShape::String,
-                "the size of unsigned number in bytes, it can be 1, 2, 4, 8, auto, default value `auto`",
+                "the size of number in bytes, it can be 1, 2, 4, 8, auto, default value `auto`",
                 Some('n'),
             )
             .category(Category::Bits)
     }
 
     fn usage(&self) -> &str {
-        "Bitwise shift left for integers"
+        "Bitwise rotate right for integers"
     }
 
     fn search_terms(&self) -> Vec<&str> {
-        vec!["shl"]
+        vec!["ror"]
     }
 
     fn run(
@@ -79,34 +79,22 @@ impl Command for SubCommand {
     fn examples(&self) -> Vec<Example> {
         vec![
             Example {
-                description: "Shift left a number by 7 bits",
-                example: "2 | bits shift-left 7",
+                description: "Rotate right a number with 2 bits",
+                example: "17 | bits rotate-right 2",
                 result: Some(Value::Int {
-                    val: 0,
+                    val: 68,
                     span: Span::test_data(),
                 }),
             },
             Example {
-                description: "Shift left a number with 2 bytes by 7 bits",
-                example: "2 | bits shift-left 7 -n 2",
-                result: Some(Value::Int {
-                    val: 256,
-                    span: Span::test_data(),
-                }),
-            },
-            Example {
-                description: "Shift left a signed number by 1 bits",
-                example: "0x7F | bits shift-left 1 -s",
-                result: Some(Value::Int {
-                    val: -2,
-                    span: Span::test_data(),
-                }),
-            },
-            Example {
-                description: "Shift left a list of numbers",
-                example: "[5 3 2] | bits shift-left 2",
+                description: "Rotate right a list of numbers",
+                example: "[15 33 92] | bits rotate-right 2",
                 result: Some(Value::List {
-                    vals: vec![Value::test_int(20), Value::test_int(12), Value::test_int(8)],
+                    vals: vec![
+                        Value::test_int(195),
+                        Value::test_int(72),
+                        Value::test_int(23),
+                    ],
                     span: Span::test_data(),
                 }),
             },
@@ -114,33 +102,20 @@ impl Command for SubCommand {
     }
 }
 
-fn get_shift_left<T: CheckedShl + Display + Copy>(val: T, shift_bits: u32, span: Span) -> Value
+fn get_rotate_right<T: Display + PrimInt>(val: T, rotate_bits: u32, span: Span) -> Value
 where
     i64: std::convert::TryFrom<T>,
 {
-    match val.checked_shl(shift_bits) {
-        Some(val) => {
-            let shift_result = i64::try_from(val);
-            match shift_result {
-                Ok(val) => Value::Int { val, span },
-                Err(_) => Value::Error {
-                    error: ShellError::GenericError(
-                        "Shift left result beyond the range of 64 bit signed number".to_string(),
-                        format!(
-                            "{} of the specified number of bytes shift left {} bits exceed limit",
-                            val, shift_bits
-                        ),
-                        Some(span),
-                        None,
-                        Vec::new(),
-                    ),
-                },
-            }
-        }
-        None => Value::Error {
+    let rotate_result = i64::try_from(val.rotate_right(rotate_bits));
+    match rotate_result {
+        Ok(val) => Value::Int { val, span },
+        Err(_) => Value::Error {
             error: ShellError::GenericError(
-                "Shift left overflow".to_string(),
-                format!("{} shift left {} bits will be overflow", val, shift_bits),
+                "Rotate right result beyond the range of 64 bit signed number".to_string(),
+                format!(
+                    "{} of the specified number of bytes rotate right {} bits",
+                    val, rotate_bits
+                ),
                 Some(span),
                 None,
                 Vec::new(),
@@ -153,40 +128,40 @@ fn operate(value: Value, bits: usize, head: Span, signed: bool, number_size: Num
     match value {
         Value::Int { val, span } => {
             use NumberBytes::*;
-            let shift_bits = (((bits % 64) + 64) % 64) as u32;
+            let rotate_bits = bits as u32;
             if signed || val < 0 {
                 match number_size {
-                    One => get_shift_left(val as i8, shift_bits, span),
-                    Two => get_shift_left(val as i16, shift_bits, span),
-                    Four => get_shift_left(val as i32, shift_bits, span),
-                    Eight => get_shift_left(val as i64, shift_bits, span),
+                    One => get_rotate_right(val as i8, rotate_bits, span),
+                    Two => get_rotate_right(val as i16, rotate_bits, span),
+                    Four => get_rotate_right(val as i32, rotate_bits, span),
+                    Eight => get_rotate_right(val as i64, rotate_bits, span),
                     Auto => {
                         if val <= 0x7F && val >= -(2i64.pow(7)) {
-                            get_shift_left(val as i8, shift_bits, span)
+                            get_rotate_right(val as i8, rotate_bits, span)
                         } else if val <= 0x7FFF && val >= -(2i64.pow(15)) {
-                            get_shift_left(val as i16, shift_bits, span)
+                            get_rotate_right(val as i16, rotate_bits, span)
                         } else if val <= 0x7FFFFFFF && val >= -(2i64.pow(31)) {
-                            get_shift_left(val as i32, shift_bits, span)
+                            get_rotate_right(val as i32, rotate_bits, span)
                         } else {
-                            get_shift_left(val as i64, shift_bits, span)
+                            get_rotate_right(val as i64, rotate_bits, span)
                         }
                     }
                 }
             } else {
                 match number_size {
-                    One => get_shift_left(val as u8, shift_bits, span),
-                    Two => get_shift_left(val as u16, shift_bits, span),
-                    Four => get_shift_left(val as u32, shift_bits, span),
-                    Eight => get_shift_left(val as u64, shift_bits, span),
+                    One => get_rotate_right(val as u8, rotate_bits, span),
+                    Two => get_rotate_right(val as u16, rotate_bits, span),
+                    Four => get_rotate_right(val as u32, rotate_bits, span),
+                    Eight => get_rotate_right(val as u64, rotate_bits, span),
                     Auto => {
                         if val <= 0xFF {
-                            get_shift_left(val as u8, shift_bits, span)
+                            get_rotate_right(val as u8, rotate_bits, span)
                         } else if val <= 0xFFFF {
-                            get_shift_left(val as u16, shift_bits, span)
+                            get_rotate_right(val as u16, rotate_bits, span)
                         } else if val <= 0xFFFFFFFF {
-                            get_shift_left(val as u32, shift_bits, span)
+                            get_rotate_right(val as u32, rotate_bits, span)
                         } else {
-                            get_shift_left(val as u64, shift_bits, span)
+                            get_rotate_right(val as u64, rotate_bits, span)
                         }
                     }
                 }

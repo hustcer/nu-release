@@ -1,3 +1,4 @@
+use super::NumberBytes;
 use nu_engine::CallExt;
 use nu_protocol::ast::Call;
 use nu_protocol::engine::{Command, EngineState, Stack};
@@ -7,15 +8,6 @@ use nu_protocol::{
 
 #[derive(Clone)]
 pub struct SubCommand;
-
-#[derive(Clone, Copy)]
-enum NumberBytes {
-    One,
-    Two,
-    Four,
-    Eight,
-    Auto,
-}
 
 impl Command for SubCommand {
     fn name(&self) -> &str {
