@@ -1,4 +1,4 @@
-use super::NumberBytes;
+use super::{get_number_bytes, NumberBytes};
 use nu_engine::CallExt;
 use nu_protocol::ast::Call;
 use nu_protocol::engine::{Command, EngineState, Stack};
@@ -53,25 +53,18 @@ impl Command for SubCommand {
         let signed = call.has_flag("signed");
         let number_bytes: Option<Spanned<String>> =
             call.get_flag(engine_state, stack, "number-bytes")?;
-        let number_bytes = match number_bytes.as_ref() {
-            None => NumberBytes::Auto,
-            Some(size) => match size.item.as_str() {
-                "1" => NumberBytes::One,
-                "2" => NumberBytes::Two,
-                "4" => NumberBytes::Four,
-                "8" => NumberBytes::Eight,
-                "auto" => NumberBytes::Auto,
-                _ => {
-                    return Err(ShellError::UnsupportedInput(
-                        "the size of number is invalid".to_string(),
-                        size.span,
-                    ))
-                }
-            },
-        };
+        let bytes_len = get_number_bytes(&number_bytes);
+        if let NumberBytes::Invalid = bytes_len {
+            if let Some(val) = number_bytes {
+                return Err(ShellError::UnsupportedInput(
+                    "the size of number is invalid".to_string(),
+                    val.span,
+                ));
+            }
+        }
 
         input.map(
-            move |value| operate(value, bits, head, signed, number_bytes),
+            move |value| operate(value, bits, head, signed, bytes_len),
             engine_state.ctrlc.clone(),
         )
     }
@@ -98,11 +91,11 @@ impl Command for SubCommand {
     }
 }
 
-fn get_rotate_left<T: Display + PrimInt>(val: T, rotate_bits: u32, span: Span) -> Value
+fn get_rotate_left<T: Display + PrimInt>(val: T, bits: u32, span: Span) -> Value
 where
     i64: std::convert::TryFrom<T>,
 {
-    let rotate_result = i64::try_from(val.rotate_left(rotate_bits));
+    let rotate_result = i64::try_from(val.rotate_left(bits));
     match rotate_result {
         Ok(val) => Value::Int { val, span },
         Err(_) => Value::Error {
@@ -110,7 +103,7 @@ where
                 "Rotate left result beyond the range of 64 bit signed number".to_string(),
                 format!(
                     "{} of the specified number of bytes rotate left {} bits",
-                    val, rotate_bits
+                    val, bits
                 ),
                 Some(span),
                 None,
@@ -124,42 +117,46 @@ fn operate(value: Value, bits: usize, head: Span, signed: bool, number_size: Num
     match value {
         Value::Int { val, span } => {
             use NumberBytes::*;
-            let rotate_bits = bits as u32;
+            let bits = bits as u32;
             if signed || val < 0 {
                 match number_size {
-                    One => get_rotate_left(val as i8, rotate_bits, span),
-                    Two => get_rotate_left(val as i16, rotate_bits, span),
-                    Four => get_rotate_left(val as i32, rotate_bits, span),
-                    Eight => get_rotate_left(val as i64, rotate_bits, span),
+                    One => get_rotate_left(val as i8, bits, span),
+                    Two => get_rotate_left(val as i16, bits, span),
+                    Four => get_rotate_left(val as i32, bits, span),
+                    Eight => get_rotate_left(val as i64, bits, span),
                     Auto => {
                         if val <= 0x7F && val >= -(2i64.pow(7)) {
-                            get_rotate_left(val as i8, rotate_bits, span)
+                            get_rotate_left(val as i8, bits, span)
                         } else if val <= 0x7FFF && val >= -(2i64.pow(15)) {
-                            get_rotate_left(val as i16, rotate_bits, span)
+                            get_rotate_left(val as i16, bits, span)
                         } else if val <= 0x7FFFFFFF && val >= -(2i64.pow(31)) {
-                            get_rotate_left(val as i32, rotate_bits, span)
+                            get_rotate_left(val as i32, bits, span)
                         } else {
-                            get_rotate_left(val as i64, rotate_bits, span)
+                            get_rotate_left(val as i64, bits, span)
                         }
                     }
+                    // This case shouldn't happen here, as it's handled before
+                    Invalid => Value::Int { val, span },
                 }
             } else {
                 match number_size {
-                    One => get_rotate_left(val as u8, rotate_bits, span),
-                    Two => get_rotate_left(val as u16, rotate_bits, span),
-                    Four => get_rotate_left(val as u32, rotate_bits, span),
-                    Eight => get_rotate_left(val as u64, rotate_bits, span),
+                    One => get_rotate_left(val as u8, bits, span),
+                    Two => get_rotate_left(val as u16, bits, span),
+                    Four => get_rotate_left(val as u32, bits, span),
+                    Eight => get_rotate_left(val as u64, bits, span),
                     Auto => {
                         if val <= 0xFF {
-                            get_rotate_left(val as u8, rotate_bits, span)
+                            get_rotate_left(val as u8, bits, span)
                         } else if val <= 0xFFFF {
-                            get_rotate_left(val as u16, rotate_bits, span)
+                            get_rotate_left(val as u16, bits, span)
                         } else if val <= 0xFFFFFFFF {
-                            get_rotate_left(val as u32, rotate_bits, span)
+                            get_rotate_left(val as u32, bits, span)
                         } else {
-                            get_rotate_left(val as u64, rotate_bits, span)
+                            get_rotate_left(val as u64, bits, span)
                         }
                     }
+                    // This case shouldn't happen here, as it's handled before
+                    Invalid => Value::Int { val, span },
                 }
             }
         }
