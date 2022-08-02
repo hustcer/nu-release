@@ -38,7 +38,7 @@ impl Command for SubCommand {
     }
 
     fn search_terms(&self) -> Vec<&str> {
-        vec!["ror"]
+        vec!["rotate right"]
     }
 
     fn run(

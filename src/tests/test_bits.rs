@@ -89,3 +89,18 @@ fn bits_rotate_left_negative() -> TestResult {
 fn bits_rotate_left_list() -> TestResult {
     run_test("[1 2 7 32 9 10] | bits rol 3 | str collect '.'", "8.16.56.256.72.80")
 }
+
+#[test]
+fn bits_rotate_right() -> TestResult {
+    run_test("2 | bits ror 3", "64")
+}
+
+#[test]
+fn bits_rotate_right_negative() -> TestResult {
+    run_test("-3 | bits ror 5", "-17")
+}
+
+#[test]
+fn bits_rotate_right_list() -> TestResult {
+    run_test("[1 2 7 32 9 10] | bits ror 3 | str collect '.'", "32.64.224.4.33.65")
+}
